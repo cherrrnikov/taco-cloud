@@ -3,13 +3,12 @@ package com.chernikov.taco_cloud.controller;
 import com.chernikov.taco_cloud.data.Ingredient;
 import com.chernikov.taco_cloud.data.Taco;
 import com.chernikov.taco_cloud.data.TacoOrder;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +33,7 @@ public class DesignTacoController {
                 new Ingredient("CHED", "Cheddar", Type.CHEESE),
                 new Ingredient("JACK", "Monterrey Jack", Type.CHEESE),
                 new Ingredient("SLSA", "Salsa", Type.SAUCE),
-                new Ingredient("SRCR", "Sour Cream", Type.SAUCE)
+                new Ingredient("SRCR", "Sour Cum", Type.SAUCE)
         );
 
         Type[] types = Ingredient.Type.values();
@@ -65,4 +64,18 @@ public class DesignTacoController {
                 .collect(Collectors.toList());
     }
 
+    @PostMapping
+    public String processTaco(
+            @Valid Taco taco, Errors errors,
+            @ModelAttribute TacoOrder tacoOrder) {
+
+        if (errors.hasErrors()) {
+            return "design";
+        }
+
+        tacoOrder.addTaco(taco);
+        log.info("Processing taco: {}" + taco);
+
+        return "redirect:/orders/current";
+    }
 }
