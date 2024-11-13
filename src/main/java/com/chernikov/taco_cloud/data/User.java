@@ -27,14 +27,14 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String username;
-    private String password;
-    private String fullName;
-    private String street;
-    private String city;
-    private String state;
-    private String zip;
-    private String phoneNumber;
+    private final String username;
+    private final String password;
+    private final String fullName;
+    private final String street;
+    private final String city;
+    private final String state;
+    private final String zip;
+    private final String phoneNumber;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

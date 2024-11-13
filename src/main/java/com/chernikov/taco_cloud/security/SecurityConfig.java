@@ -4,16 +4,20 @@ import com.chernikov.taco_cloud.data.User;
 import com.chernikov.taco_cloud.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
@@ -23,24 +27,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-//        List<UserDetails> usersList = new ArrayList<>();
-//        usersList.add(
-//                new User(
-//                        "buzz", passwordEncoder.encode("password"),
-//                        Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))
-//                )
-//        );
-//        usersList.add(
-//                new User(
-//                        "woody", passwordEncoder.encode("password"),
-//                        Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))
-//                )
-//        );
-//        return (UserDetailsService) new InMemoryUserDetailsManager(usersList);
-//    }
-
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return username -> {
@@ -49,5 +35,20 @@ public class SecurityConfig {
 
             throw new UsernameNotFoundException("User '" + username +"' not found");
         };
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/design", "/orders").hasRole("USER")
+                        .anyRequest().permitAll()
+                )
+                .formLogin(form -> form
+                    .loginPage("/login") // Задание пользовательской страницы входа
+                )
+                .logout(withDefaults()); // Настройка выхода из системы
+
+        return http.build();
     }
 }
